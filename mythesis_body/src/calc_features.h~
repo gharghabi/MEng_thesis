@@ -1,0 +1,37 @@
+#include <ros/ros.h>
+#include "upperbodycore_msgs/Skeleton.h"
+struct position
+{
+	double x;
+	double y;
+	double z;
+};
+class calc_features
+{
+
+	private:
+	    	    
+	    static int const jointNum =15;
+	    static int const features_count = 10;
+	    ros::NodeHandle nh_;
+	    ros::Subscriber sub_;
+  	    float confidence;
+            double body_features[10];
+			
+		void SkeletonData_CB(const upperbodycore_msgs::Skeleton msg);
+		void Calc_All_Features();
+	public:
+  	    upperbodycore_msgs::Skeleton SkData;
+
+	    calc_features();
+	   ~calc_features();
+	   double *get_features();
+	   double get_ED_floor_head();
+ 	   double get_R_torso_leg();
+ 	   double get_hight_estimate();
+ 	   double get_ED_floor_neck();
+ 	   double get_ED_neck_leftshoulder();
+  	   double get_ED_neck_rightshoulder();
+	   double *calc_variance_average(double *bodyfeatures_firstperson, double *bodyfeatures_secondperson);
+	   double *get_normalize_features(double *bodyfeatures_firstperson,double *bodyfeatures_secondperson);
+	};

@@ -16,17 +16,16 @@ struct floor_coefficient
 };
 class calc_features
 {
-
 	private:
 	    	    
 	    static int const jointNum =15;
-	    static int const features_count = 7;
+        static int const features_count = 16;
 	    ros::NodeHandle nh_;
 	    ros::Subscriber sub_;
   	    float confidence;
 	    floor_coefficient floorParameters;
-            double body_features[10];
-	    double normalize_body_features[10];		
+            double body_features[features_count];
+        double normalize_body_features[features_count];
 	    void Calc_All_Features();
 
 	public:

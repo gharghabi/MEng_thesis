@@ -21,12 +21,12 @@ std::ofstream OFCorrespondece;
 
 struct features
 {
-    double d[13];
+    double d[17];
     string model;
     int aveNum;//tedade vijegi hayi ke az an ha miangin gerefte shode ast
 };
-int featuresCount = 8;
-double ave_var[13][2];
+int featuresCount = 16;
+double ave_var[17][2];
 calc_features *gClient;
 std::vector<features> testModels,trainModels;
 bool loadTrainModels(std::vector<features> &trainModels, const std::string filename);
@@ -40,8 +40,8 @@ int main(int argc, char **argv) {
     ros::init(argc, argv, "testVFHOnDataset_node");
 
     gClient = new calc_features();
-    string fileaddress = "/home/shaghayegh/catkin_ws/src/mythesis_body/dataset/RGBD-ID/data/walking2/";
-    string trainFileAddress = "/home/shaghayegh/catkin_ws/src/mythesis_body/dataset/RGBD-ID/data/collaborative/";
+    string fileaddress = "/home/shaghayegh/catkin_ws/src/thesis/mythesis_body/dataset/RGBD-ID/data/walking2/";
+    string trainFileAddress = "/home/shaghayegh/catkin_ws/src/thesis/mythesis_body/dataset/RGBD-ID/data/collaborative/";
     string Trainfeatures = ros::package::getPath("mythesis_body")+"/src/collaborativeFeatures.txt";
     string Testfeatures = ros::package::getPath("mythesis_body")+"/src/walking2Features.txt";
     string correspondenseResult = ros::package::getPath("mythesis_body")+"/src/correspondenceFeatures.txt";
@@ -108,6 +108,7 @@ bool loadTrainModels (std::vector<features> &models, const std::string filename)
             floor_data_file.append("0"+to_string(i)+"/floor/floor.txt");
         //        cout<<"i= "<<i<<" ";
         ifstream fs;
+        cout<<floor_data_file.c_str()<<endl;
         fs.open (floor_data_file.c_str ());
         string line;
         getline (fs, line);
@@ -147,7 +148,7 @@ bool loadTrainModels (std::vector<features> &models, const std::string filename)
             upperbodycore_msgs::Skeleton Skeletonfeature = extract_feature(path);//feature calculation
             gClient->SkeletonData_CB(Skeletonfeature);
             //            cout<<endl;
-            double *calcFeature = gClient->get_features_skeleton_article();
+            double *calcFeature = gClient->get_features_skeleton_my();
             for (int i= 1; i<featuresCount ;++i)
             {
                 modelFeature.d[i] += calcFeature[i];
@@ -161,7 +162,7 @@ bool loadTrainModels (std::vector<features> &models, const std::string filename)
         }
         OFTrainData<<"\n";
         models.push_back(modelFeature);
-        //        cout<<models.size()<<" models size "<<endl;
+               cout<<models.size()<<" models size "<<endl;
     }
 
     double d[models.size()];
@@ -236,7 +237,7 @@ void loadtestModels (std::vector<features> &models, const std::string filename)
             upperbodycore_msgs::Skeleton Skeletonfeature = extract_feature(path);//feature calculation
             gClient->SkeletonData_CB(Skeletonfeature);
             //            cout<<endl;
-            double *calcFeature = gClient->get_features_skeleton_article();
+            double *calcFeature = gClient->get_features_skeleton_my();
             for (int i= 1; i<featuresCount ;++i)
             {
                 modelFeature.d[i] += calcFeature[i];

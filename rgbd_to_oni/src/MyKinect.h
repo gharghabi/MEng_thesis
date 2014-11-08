@@ -1,0 +1,198 @@
+/**
+ * @file MyImage
+ * @brief fichero de clase para controlar la Kinect
+ * @author Juan Carlos Gámez
+ * @version 1.2
+ * @date junio 2012
+ * @note Fichero genérico para controlar la Kinect
+*/
+
+#ifndef MYKINECT_H
+#define MYKINECT_H
+
+
+#include "MyImage.h"
+//includes para KINECT (OpenNI)
+#include <XnCppWrapper.h>
+#include <XnLog.h>
+
+
+//includes para KINECT (freenect)
+#include "libfreenect.h"
+//#include "libKinect/libfreenect_cv.h"
+#include "libfreenect_sync.h"
+
+//
+//#include <iostream>
+//#include <cstdio>
+//#include <string>
+//
+//using namespace cv;
+//using namespace xn;
+//using namespace std;
+
+class MyKinect
+{
+    public:
+        /** Default constructor */
+        MyKinect();
+        /** Default destructor */
+        ~MyKinect();
+
+        /**
+        Inicializa la Kinect sin fichero XML (para lectura de fichero ONI)
+        */
+        int init();
+        /**
+        * Lectura de un fichero ONI como si estuviese trabajando con la kinect directamente
+        */
+        int readONIFile(String inputName);
+        /**
+        Inicializa la Kinect con fichero XML (para captura desde kinect directamente)
+        */
+        int init(String fileXML);
+        /**
+        Inicializa los Generadores de la Kinect
+        */
+        int initGenerators();
+        /**
+        Lee el numero de Frames en el caso de ser un fichero .oni
+        */
+        int readNumFrames();
+        /**
+        Lee un frame de la kinect
+        */
+        int readFrame(MyImage *imgMyImage);
+        /**
+        Escribe un frame a la kinect (para grabar ficheros .oni)
+        */
+        int writeFrame(MyImage *imgMyImage);
+        /**
+        * Modifica el valor de TILT de la kinect (utiliza freenect ya que a día de hoy no se puede con OpenNI)
+        */
+        int setTilt(int arg_freenect_angle);
+        /**
+        * Modifica el valor del LED de la kinect (utiliza freenect ya que a día de hoy no se puede con OpenNI)
+        */
+        int setLed(freenect_led_options arg_led);
+
+        /**
+        * Inicializa y realiza la grabación de la kinect en un fichero ONI
+        */
+        int saveONIFile(String outputName);
+        /**
+        * Inicializa y realiza la grabación "mock" (modificada) de un fichero ONI a otro
+        */
+        int saveMockONIFile(String outputName);
+        /**
+        * Realiza la grabación de cada frame
+        */
+        int record();
+        /**
+        * Detiene la grabación
+        */
+        int stopRecord();
+
+        /**
+        * get numFrmesImage
+        */
+        XnUInt32 getnumFramesImage();
+        /**
+        * get numFrmesDepth
+        */
+        XnUInt32 getnumFramesDepth();
+        /**
+        * get g_Context
+        */
+        Context getg_Context();
+        /**
+        * get g_Device
+        */
+        Device getg_Device();
+        /**
+        * get g_Depth
+        */
+        DepthGenerator getg_Depth();
+        /**
+        * get g_Image
+        */
+        ImageGenerator getg_Image();
+        /**
+        * get g_IR
+        */
+        IRGenerator getg_IR();
+        /**
+        * get g_DepthMD
+        */
+        const DepthMetaData* getg_DepthMD();
+        /**
+        * get g_ImageMD
+        */
+        const ImageMetaData* getg_ImageMD();
+        /**
+        * get g_irMD
+        */
+        const IRMetaData* getg_irMD();
+        /**
+        * get g_User
+        */
+        UserGenerator getg_User();
+        /**
+        * get analyScene
+        */
+        SceneAnalyzer getanalyScene();
+        /**
+        * get analySceneMD
+        */
+        const SceneMetaData* getanalySceneMD();
+        /**
+        * get freenect_angle
+        */
+        int getfreenect_angle();
+        /**
+        * get led
+        */
+        freenect_led_options getled();
+        /**
+        * get fileXML
+        */
+        String getfileXML();
+
+        // Indica el grado de depuración, el nivel al que se van a presentar los mensajes en pantalla
+        int debug;
+
+    protected:
+        Player player;
+        XnUInt32 numFramesImage, numFramesDepth;
+
+        Context g_Context;
+
+        Device g_Device;
+        DepthGenerator g_Depth;
+        ImageGenerator g_Image;
+        IRGenerator g_IR;
+
+        DepthMetaData g_DepthMD;
+        ImageMetaData g_ImageMD;
+        IRMetaData g_irMD;
+
+//        Generator* pGenerator;
+        Recorder* pRecorder;
+
+        UserGenerator g_User;
+        SceneAnalyzer analyScene;
+        SceneMetaData analySceneMD;
+
+        int freenect_angle;
+        freenect_led_options led;
+        String fileXML;
+
+        //para poder modificar las imágenes y profundidad y poder guardarlo como .oni
+        MockDepthGenerator mockg_Depth;
+        MockImageGenerator mockg_Image;
+
+
+    private:
+};
+
+#endif // MYKINECT_H

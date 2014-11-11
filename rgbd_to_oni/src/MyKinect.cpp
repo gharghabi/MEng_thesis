@@ -1,19 +1,26 @@
 #include "MyKinect.h"
 
 using namespace xn;
+#define CHECK_RC(rc, what) \
+    if (rc != XN_STATUS_OK) \
+{ \
+    printf("%s failed: %s\n", what, xnGetStatusString(rc)); \
+    return rc; \
+    }
 
+#define SAMPLE_XML_PATH "/home/shaghayegh/backup/SamplesConfig.xml"
 /** Default constructor */
 MyKinect::MyKinect()
 {
     //ctor
     freenect_angle= 0;
-    led= LED_BLINK_GREEN;
+    //    led= LED_BLINK_GREEN;
     numFramesImage=0;
     numFramesDepth=0;
 
     debug= 0;
 
-//cout << "MyKinect constructor" << endl;
+    //cout << "MyKinect constructor" << endl;
 }
 
 MyKinect::~MyKinect(){
@@ -26,10 +33,11 @@ MyKinect::~MyKinect(){
     g_User.Release();
     analyScene.Release();
     mockg_Depth.Release();
-    mockg_Image.Release();
+   // mockg_Image.Release();
+    mockg_Image2.Release();
     g_Context.Release();
 
-//cout << "MyKinect destructor" << endl;
+    //cout << "MyKinect destructor" << endl;
 }
 
 /**
@@ -43,7 +51,7 @@ int MyKinect::init(){
         printf("ERROR en llamada a Init %s\n", xnGetStatusString(rc));
         return(-1);
     }
-//cout << "MyKinect::init()" << endl;
+    //cout << "MyKinect::init()" << endl;
     return 1;
 }
 
@@ -58,7 +66,7 @@ int MyKinect::readONIFile(String inputName){
         printf("ERROR lectura de fichero oni openFileRecording(%s) %s\n", inputName.c_str(), xnGetStatusString(rc));
         return(-1);
     }
-//cout << "MyKinect::readONIFile" << endl;
+    //cout << "MyKinect::readONIFile" << endl;
     return 1;
 }
 
@@ -72,7 +80,11 @@ int MyKinect::init(String arg_fileXML){
 
     XnStatus rc = XN_STATUS_OK;
     EnumerationErrors errors;
-    rc = g_Context.InitFromXmlFile(fileXML.c_str(), &errors);
+//    rc = g_Context.InitFromXmlFile(fileXML.c_str(), &errors);
+    rc = g_Context.Init();
+    CHECK_RC(rc, "Init");
+    rc = g_Context.OpenFileRecording("/media/6B58CB581C0AACF6/1.oni");
+
     if (rc == XN_STATUS_NO_NODE_PRESENT)
     {
         XnChar strError[1024];
@@ -87,55 +99,55 @@ int MyKinect::init(String arg_fileXML){
         g_Context.Shutdown();
         return(-1);
     }
-//cout << "MyKinect::init(fileXML)" << endl;
+    //cout << "MyKinect::init(fileXML)" << endl;
     return 1;
 }
 
 /**
-Inicializa los Generadores de la Kinect
+Inicializa los Generadores de la Kinect //Initializes Generators Kinect
 */
 int MyKinect::initGenerators()
 {
-	XnStatus rc = XN_STATUS_OK;
+    XnStatus rc = XN_STATUS_OK;
 
-	NodeInfoList list;
-	rc = g_Context.EnumerateExistingNodes(list);
-	if (rc == XN_STATUS_OK)
-	{
-		for (NodeInfoList::Iterator it = list.Begin(); it != list.End(); ++it)
-		{
-			switch ((*it).GetDescription().Type)
-			{
-			case XN_NODE_TYPE_DEVICE:
-				(*it).GetInstance(g_Device);
-				break;
-			case XN_NODE_TYPE_DEPTH:
-				(*it).GetInstance(g_Depth);
-				break;
-			case XN_NODE_TYPE_IMAGE:
-				(*it).GetInstance(g_Image);
-				break;
-			case XN_NODE_TYPE_IR:
-				(*it).GetInstance(g_IR);
-				break;
-			case XN_NODE_TYPE_USER:
-				(*it).GetInstance(g_User);
-				break;
-			case XN_NODE_TYPE_SCENE:
-				(*it).GetInstance(analyScene);
-				break;
-			}
-		}
-	}
+    NodeInfoList list;
+    rc = g_Context.EnumerateExistingNodes(list);
+    if (rc == XN_STATUS_OK)
+    {
+        for (NodeInfoList::Iterator it = list.Begin(); it != list.End(); ++it)
+        {
+            switch ((*it).GetDescription().Type)
+            {
+            case XN_NODE_TYPE_DEVICE:
+                (*it).GetInstance(g_Device);
+                break;
+            case XN_NODE_TYPE_DEPTH:
+                (*it).GetInstance(g_Depth);
+                break;
+            case XN_NODE_TYPE_IMAGE:
+                (*it).GetInstance(g_Image);
+                break;
+            case XN_NODE_TYPE_IR:
+                (*it).GetInstance(g_IR);
+                break;
+            case XN_NODE_TYPE_USER:
+                (*it).GetInstance(g_User);
+                break;
+            case XN_NODE_TYPE_SCENE:
+                (*it).GetInstance(analyScene);
+                break;
+            }
+        }
+    }
 
 
     /// Probar a calibrar la kinect y corregir la diferencia entre las cámaras RGB y Depth
     if ( ( g_Depth.IsCapabilitySupported(XN_CAPABILITY_ALTERNATIVE_VIEW_POINT) ) && ( g_Image.IsValid() )){
-//            cout << "vista alternativa" << endl;
-            g_Depth.GetAlternativeViewPointCap().SetViewPoint(g_Image);
+        //            cout << "vista alternativa" << endl;
+        g_Depth.GetAlternativeViewPointCap().SetViewPoint(g_Image);
     }
     else{
-//        cout << " NO vista alternativa" << endl;
+        //        cout << " NO vista alternativa" << endl;
         g_Depth.GetAlternativeViewPointCap().ResetViewPoint();
     }
 
@@ -147,7 +159,7 @@ int MyKinect::initGenerators()
         cout << "user capability skeleton" << endl;
 
 
-//cout << "MyKinect::init" << endl;
+    //cout << "MyKinect::init" << endl;
     return 1;
 }
 
@@ -157,9 +169,9 @@ Lee el numero de Frames en el caso de ser un fichero .oni
 */
 int MyKinect::readNumFrames(){
 
-	XnStatus rc = XN_STATUS_OK;
+    XnStatus rc = XN_STATUS_OK;
 
-   // para obtener el numero de frames de imagen y profundidad
+    // para obtener el numero de frames de imagen y profundidad
     rc = player.SetRepeat(TRUE);
 
     if (rc != XN_STATUS_OK){
@@ -185,35 +197,35 @@ Lee un frame de la kinect
 int MyKinect::readFrame(MyImage *imgMyImage)
 {
 
-	XnStatus rc = XN_STATUS_OK;
-	EnumerationErrors errors;
+    XnStatus rc = XN_STATUS_OK;
+    EnumerationErrors errors;
 
-	  rc = g_Context.WaitAnyUpdateAll(); // es el que va mejor!!!!!
-//	  rc = g_Context.WaitAndUpdateAll();
-//	  rc = g_Context.WaitNoneUpdateAll();  // con este no se visualiza nada!!!!!
-//    rc = g_Context.WaitOneUpdateAll(g_Image);
-//    rc = g_Context.WaitOneUpdateAll(g_Depth);
+    rc = g_Context.WaitAnyUpdateAll(); // es el que va mejor!!!!!
+    //	  rc = g_Context.WaitAndUpdateAll();
+    //	  rc = g_Context.WaitNoneUpdateAll();  // con este no se visualiza nada!!!!!
+    //    rc = g_Context.WaitOneUpdateAll(g_Image);
+    //    rc = g_Context.WaitOneUpdateAll(g_Depth);
 
-	if (rc != XN_STATUS_OK){
-		printf("%s\n", xnGetStatusString(rc));
-		return(-1);
-	}
+    if (rc != XN_STATUS_OK){
+        printf("%s\n", xnGetStatusString(rc));
+        return(-1);
+    }
     if (g_Image.IsValid()){
-//        cout <<  "IMG VALIDO" << endl;
+        //        cout <<  "IMG VALIDO" << endl;
         g_Image.GetMetaData(g_ImageMD);
     }
     if (g_Depth.IsValid()){
-//        cout <<  "DEPTH VALIDO" << endl;
+        //        cout <<  "DEPTH VALIDO" << endl;
         g_Depth.GetMetaData(g_DepthMD);
     }
     if (g_IR.IsValid()){
-//        cout <<  "IR VALIDO" << endl;
+        //        cout <<  "IR VALIDO" << endl;
         g_IR.GetMetaData(g_irMD);
     }
 
 
     if (analyScene.IsValid()){
-//        cout <<  "analyScene VALIDO" << endl;
+        //        cout <<  "analyScene VALIDO" << endl;
         analyScene.GetMetaData(analySceneMD);
     }
 
@@ -228,8 +240,8 @@ int MyKinect::readFrame(MyImage *imgMyImage)
     cvSetData(imageAux,pImageData, 640*3);
     cvCvtColor(imageAux, iplImgFrame, CV_RGB2BGR);
 
-//    cvShowImage("RGB Dentro",iplImgFrame);
-//    cvShowImage("RGB Dentro Aux",imageAux);
+    //    cvShowImage("RGB Dentro",iplImgFrame);
+    //    cvShowImage("RGB Dentro Aux",imageAux);
 
 
     //process depth data
@@ -238,10 +250,11 @@ int MyKinect::readFrame(MyImage *imgMyImage)
 
     IplImage *iplDepthFrame= cvCreateImageHeader(cvSize(g_DepthMD.XRes(),g_DepthMD.YRes()),16,1);
 
+
     XnDepthPixel* pDepthData= const_cast <XnDepthPixel*> (pDepthMap);
     cvSetData(iplDepthFrame,pDepthData, 640*2);
 
-//    cvShowImage("Depth Dentro Aux",iplDepthFrame);
+    //    cvShowImage("Depth Dentro Aux",iplDepthFrame);
 
 
 
@@ -249,22 +262,24 @@ int MyKinect::readFrame(MyImage *imgMyImage)
     imgMyImage->setImg(iplImgFrame);
     imgMyImage->setDepth(iplDepthFrame);
 
-//    imshow("myimagedentro",imgMyImage->getImg());
-//    imshow("myimageDepth", imgMyImage->getShowDepth(0,10000000));
-//    imshow("myimageDepth 0 255", imgMyImage->getShowDepth(0,255));
+    imshow("image show ",imgMyImage->getImg());
+    waitKey(0);
+    //    imshow("myimagedentro",imgMyImage->getImg());
+    //    imshow("myimageDepth", imgMyImage->getShowDepth(0,10000000));
+    //    imshow("myimageDepth 0 255", imgMyImage->getShowDepth(0,255));
 
 
     //actualizar Frames
     imgMyImage->setFrameImg(g_ImageMD.FrameID());
     imgMyImage->setFrameDepth(g_DepthMD.FrameID());
 
-//cout << "release" << endl;
+    //cout << "release" << endl;
     cvReleaseImageHeader(&imageAux);
     cvReleaseImage(&iplImgFrame);
     cvReleaseImageHeader(&iplDepthFrame);
-//cout << "después release" << endl;
+    //cout << "después release" << endl;
 
-//cout << "MyKinect::readFrame" << endl;
+    //cout << "MyKinect::readFrame" << endl;
     return 1;
 }
 
@@ -274,19 +289,19 @@ Escribe un frame a la kinect (para grabar ficheros .oni)
 */
 int MyKinect::writeFrame(MyImage *imgMyImage){
 
-	XnStatus rc = XN_STATUS_OK;
-	EnumerationErrors errors;
+    XnStatus rc = XN_STATUS_OK;
+    EnumerationErrors errors;
 
-	  rc = g_Context.WaitAnyUpdateAll(); // es el que va mejor!!!!!
-//	  rc = g_Context.WaitAndUpdateAll();
-//	  rc = g_Context.WaitNoneUpdateAll();  // con este no se visualiza nada!!!!!
+      rc = g_Context.WaitAnyUpdateAll(); // es el que va mejor!!!!!
+//    rc = g_Context.WaitAndUpdateAll();
+//    rc = g_Context.WaitNoneUpdateAll();  // con este no se visualiza nada!!!!!
 //    rc = g_Context.WaitOneUpdateAll(g_Image);
 //    rc = g_Context.WaitOneUpdateAll(g_Depth);
-
-	if (rc != XN_STATUS_OK){
-		printf("%s\n", xnGetStatusString(rc));
-		return(-1);
-	}
+ MockImageGenerator mockImageMan;
+    if (rc != XN_STATUS_OK){
+        printf("%s\n", xnGetStatusString(rc));
+        return(-1);
+    }
     if (g_Image.IsValid()){
 //cout <<  "IMG VALIDO" << endl;
         g_Image.GetMetaData(g_ImageMD);
@@ -294,8 +309,8 @@ int MyKinect::writeFrame(MyImage *imgMyImage){
     if (g_Depth.IsValid()){
 //cout <<  "DEPTH VALIDO" << endl;
         g_Depth.GetMetaData(g_DepthMD);
-    }
-    if (mockg_Image.IsValid()){
+    }//nkh
+    if (mockg_Image2.IsValid()){
 //cout <<  "MOCK IMG VALIDO" << endl;
     }
     if (mockg_Depth.IsValid()){
@@ -306,60 +321,62 @@ int MyKinect::writeFrame(MyImage *imgMyImage){
     //process image data
     // hacer que se pueda modificar
     rc= g_ImageMD.MakeDataWritable();
-	if (rc != XN_STATUS_OK){
-		printf("g_ImageMD.MakeDataWritable(); - %s\n", xnGetStatusString(rc));
-		return(-1);
-	}
+    if (rc != XN_STATUS_OK){
+        printf("g_ImageMD.MakeDataWritable(); - %s\n", xnGetStatusString(rc));
+        return(-1);
+    }
 
     // Take current image
     RGB24Map& imageMap = g_ImageMD.WritableRGB24Map();
-	for (XnUInt32 y = 0; y < imageMap.YRes(); y++)
-	{
-		for (XnUInt32 x = 0; x < imageMap.XRes(); x++)
-		{
-			XnRGB24Pixel imagePixel;
+    cout<<imageMap.YRes()<<" y res "<<imageMap.XRes()<<" x res "<<imgMyImage->getHeight()<<" image height "<<imgMyImage->getWidth()<<" image width "<<endl;
+    for (XnUInt32 y = 0; y < 228; y++)
+    {
+        for (XnUInt32 x = 0; x <640; x++)
+        {
+            XnRGB24Pixel imagePixel;
+//            cout<<" x "<<x<<" y "<<y<<endl;
+            imagePixel.nBlue=imgMyImage->getValueB(x,y);
+            imagePixel.nGreen=imgMyImage->getValueG(x,y);
+            imagePixel.nRed=imgMyImage->getValueR(x,y);
 
-			imagePixel.nBlue=imgMyImage->getValueB(x,y);
-			imagePixel.nGreen=imgMyImage->getValueG(x,y);
-			imagePixel.nRed=imgMyImage->getValueR(x,y);
-
-			imageMap(x,y) = imagePixel;
-		}
-	}
-
+            imageMap(x,y) = imagePixel;
+        }
+    }
+    cout<<" 338 "<<endl;
     //escribir los datos "realmente"
-    rc= mockg_Image.SetData(g_ImageMD);
-	if (rc != XN_STATUS_OK){
-		printf("mockg_Image.SetData(g_ImageMD); - %s\n", xnGetStatusString(rc));
-		return(-1);
-	}
-
+    rc= mockImageMan.SetData(g_ImageMD);
+    //rc=XN_STATUS_OK ;
+    if (rc != XN_STATUS_OK){
+        printf("mockg_Image.SetData(g_ImageMD); - %s\n", xnGetStatusString(rc));
+        return(-1);
+    }
+  cout<<" 345 "<<endl;
     //process depth data
     // hacer que se pueda modificar
     rc= g_DepthMD.MakeDataWritable();
-	if (rc != XN_STATUS_OK){
-		printf("g_DepthMD.MakeDataWritable(); - %s\n", xnGetStatusString(rc));
-		return(-1);
-	}
+    if (rc != XN_STATUS_OK){
+        printf("g_DepthMD.MakeDataWritable(); - %s\n", xnGetStatusString(rc));
+        return(-1);
+    }
 
-
+    cout<< " 354 "<<endl;
     // Take current depth map
     DepthMap& depthMap = g_DepthMD.WritableDepthMap();
-	for (XnUInt32 y = 0; y < depthMap.YRes(); y++)
-	{
-		for (XnUInt32 x = 0; x < depthMap.XRes(); x++)
-		{
-			//Punch vertical cut lines in the depth image
-			depthMap(x,y) = imgMyImage->getValueDepth(x,y);
-		}
-	}
-
+    for (XnUInt32 y = 0; y < depthMap.YRes(); y++)
+    {
+        for (XnUInt32 x = 0; x < depthMap.XRes(); x++)
+        {
+            //Punch vertical cut lines in the depth image
+            depthMap(x,y) = imgMyImage->getValueDepth(x,y);
+        }
+    }
+    cout<<" 365 "<<endl;
     //escribir los datos "realmente"
     rc= mockg_Depth.SetData(g_DepthMD);
-	if (rc != XN_STATUS_OK){
-		printf("mockg_Depth.SetData(g_DepthMD); - %s\n", xnGetStatusString(rc));
-		return(-1);
-	}
+    if (rc != XN_STATUS_OK){
+        printf("mockg_Depth.SetData(g_DepthMD); - %s\n", xnGetStatusString(rc));
+        return(-1);
+    }
 
 //cout << "MyKinect::writeFrame" << endl;
     return 1;
@@ -371,134 +388,136 @@ int MyKinect::writeFrame(MyImage *imgMyImage){
 int MyKinect::setTilt(int arg_freenect_angle){
 
 
-    freenect_angle= arg_freenect_angle;
+    //    freenect_angle= arg_freenect_angle;
 
-    freenect_context *f_ctx;
-    freenect_device *f_dev;
+    //    freenect_context *f_ctx;
+    //    freenect_device *f_dev;
 
-    if (freenect_angle > 30) {
-        freenect_angle = 30;
-        return 1;
-    }
+    //    if (freenect_angle > 30) {
+    //        freenect_angle = 30;
+    //        return 1;
+    //    }
 
-    //cerrar openni
-    g_Context.Shutdown();
-//    sleep(20);
-
-
-    // abrir libfreenect
-	while (freenect_init(&f_ctx, NULL) < 0) {
-		printf("freenect_init() failed\n");
-//		return -1;
-	}
-
-	freenect_set_log_level(f_ctx, FREENECT_LOG_DEBUG);
-
-	int nr_devices = freenect_num_devices (f_ctx);
-	printf ("Number of devices found: %d\n", nr_devices);
-
-	int user_device_number = 0;
-//	if (argc > 1)
-//		user_device_number = atoi(argv[1]);
-
-	if (nr_devices < 1)
-		return -1;
-
-	while (freenect_open_device(f_ctx, &f_dev, user_device_number) < 0) {
-		printf("Could not open device\n");
-		sleep(3);
-//		return -1;
-	}
+    //    //cerrar openni
+    //    g_Context.Shutdown();
+    ////    sleep(20);
 
 
-//    freenect_sync_set_tilt_degs(14,0);
-    cout << "poner el tilt" << endl;
-    freenect_set_tilt_degs(f_dev, freenect_angle);
+    //    // abrir libfreenect
+    //	while (freenect_init(&f_ctx, NULL) < 0) {
+    //		printf("freenect_init() failed\n");
+    ////		return -1;
+    //	}
 
-    cout << "cerrar kinect" << endl;
-	freenect_close_device(f_dev);
-	freenect_shutdown(f_ctx);
+    //	freenect_set_log_level(f_ctx, FREENECT_LOG_DEBUG);
+
+    //	int nr_devices = freenect_num_devices (f_ctx);
+    //	printf ("Number of devices found: %d\n", nr_devices);
+
+    //	int user_device_number = 0;
+    ////	if (argc > 1)
+    ////		user_device_number = atoi(argv[1]);
+
+    //	if (nr_devices < 1)
+    //		return -1;
+
+    //	while (freenect_open_device(f_ctx, &f_dev, user_device_number) < 0) {
+    //		printf("Could not open device\n");
+    //		sleep(3);
+    ////		return -1;
+    //	}
 
 
-	//volver a abrir openni
-    if (init(fileXML) < 0){
-       cout << "ERROR al iniciar la kinect con el fichero " << fileXML << endl;
-       exit(-1);
-    }
-    if (initGenerators() < 0){
-        cout << "ERROR al iniciar la Kinect" << endl;
-        return -1;
-    }
-//cout << "MyKinect::setTilt" << endl;
+    ////    freenect_sync_set_tilt_degs(14,0);
+    //    cout << "poner el tilt" << endl;
+    //    freenect_set_tilt_degs(f_dev, freenect_angle);
+
+    //    cout << "cerrar kinect" << endl;
+    //	freenect_close_device(f_dev);
+    //	freenect_shutdown(f_ctx);
+
+
+    //	//volver a abrir openni
+    //    if (init(fileXML) < 0){
+    //       cout << "ERROR al iniciar la kinect con el fichero " << fileXML << endl;
+    //       exit(-1);
+    //    }
+    //    if (initGenerators() < 0){
+    //        cout << "ERROR al iniciar la Kinect" << endl;
+    //        return -1;
+    //    }
+    //cout << "MyKinect::setTilt" << endl;
 }
 
 /**
+  Change the size of the kinect LED (used freenect because today you can not with OpenNI)
 * Modifica el valor del LED de la kinect (utiliza freenect ya que a día de hoy no se puede con OpenNI)
 */
-int MyKinect::setLed(freenect_led_options arg_led){
+//int MyKinect::setLed(freenect_led_options arg_led){
 
-    led= arg_led;
+//    led= arg_led;
 
-    freenect_context *f_ctx;
-    freenect_device *f_dev;
-
-
-    //cerrar openni
-    g_Context.Shutdown();
-//    sleep(20);
+//    freenect_context *f_ctx;
+//    freenect_device *f_dev;
 
 
-    // abrir libfreenect
-	while (freenect_init(&f_ctx, NULL) < 0) {
-		printf("freenect_init() failed\n");
-		sleep(3);
+//    //cerrar openni
+//    g_Context.Shutdown();
+////    sleep(20);
+
+
+//    // abrir libfreenect
+//	while (freenect_init(&f_ctx, NULL) < 0) {
+//		printf("freenect_init() failed\n");
+//		sleep(3);
+////		return -1;
+//	}
+
+//	freenect_set_log_level(f_ctx, FREENECT_LOG_DEBUG);
+
+//	int nr_devices = freenect_num_devices (f_ctx);
+//	printf ("Number of devices found: %d\n", nr_devices);
+
+//	int user_device_number = 0;
+////	if (argc > 1)
+////		user_device_number = atoi(argv[1]);
+
+//	if (nr_devices < 1)
 //		return -1;
-	}
 
-	freenect_set_log_level(f_ctx, FREENECT_LOG_DEBUG);
-
-	int nr_devices = freenect_num_devices (f_ctx);
-	printf ("Number of devices found: %d\n", nr_devices);
-
-	int user_device_number = 0;
-//	if (argc > 1)
-//		user_device_number = atoi(argv[1]);
-
-	if (nr_devices < 1)
-		return -1;
-
-	while (freenect_open_device(f_ctx, &f_dev, user_device_number) < 0) {
-		printf("Could not open device\n");
-//		return -1;
-	}
+//	while (freenect_open_device(f_ctx, &f_dev, user_device_number) < 0) {
+//		printf("Could not open device\n");
+////		return -1;
+//	}
 
 
-//    freenect_sync_set_tilt_degs(14,0);
-    cout << "poner el led" << endl;
-    freenect_set_led(f_dev, led);
+////    freenect_sync_set_tilt_degs(14,0);
+//    cout << "poner el led" << endl;
+//    freenect_set_led(f_dev, led);
 
-    cout << "cerrar kinect" << endl;
-	freenect_close_device(f_dev);
-	freenect_shutdown(f_ctx);
+//    cout << "cerrar kinect" << endl;
+//	freenect_close_device(f_dev);
+//	freenect_shutdown(f_ctx);
 
 
-	//volver a abrir openni y capturar algo para que no comience la captura de nuevo
-    if (init(fileXML) < 0){
-       cout << "ERROR al iniciar la kinect con el fichero " << fileXML << endl;
-       exit(-1);
-    }
-    if (initGenerators() < 0){
-        cout << "ERROR al iniciar la Kinect" << endl;
-        return -1;
-    }
-//cout << "MyKinect::setLed" << endl;
-}
+//	//volver a abrir openni y capturar algo para que no comience la captura de nuevo
+//    if (init(fileXML) < 0){
+//       cout << "ERROR al iniciar la kinect con el fichero " << fileXML << endl;
+//       exit(-1);
+//    }
+//    if (initGenerators() < 0){
+//        cout << "ERROR al iniciar la Kinect" << endl;
+//        return -1;
+//    }
+////cout << "MyKinect::setLed" << endl;
+//}
 
 
 /**
 * Inicializa y realiza la grabación de la kinect en un fichero ONI
 */
 int MyKinect::saveONIFile(String outputName){
+
 
     XnStatus rc= XN_STATUS_OK;
     NodeInfoList recorderList;
@@ -571,6 +590,7 @@ int MyKinect::saveONIFile(String outputName){
 }
 
 /**
+  Initializes and performs recording "mock " (modified ) from a NIB file to another
 * Inicializa y realiza la grabación "mock" (modificada) de un fichero ONI a otro
 */
 int MyKinect::saveMockONIFile(String outputName){
@@ -618,14 +638,16 @@ int MyKinect::saveMockONIFile(String outputName){
         }
     }
 
-    rc = mockg_Image.CreateBasedOn(g_Image);
+   // rc = mockg_Image.CreateBasedOn(g_Image);
+    rc = mockg_Image2.CreateBasedOn(g_Image);
     if (rc != XN_STATUS_OK){
         printf("ERROR crear mockg_Image.CreateBasedOn(g_Image) %s\n", xnGetStatusString(rc));
         return(-1);
-    }
-    if (mockg_Image.IsValid()){
+    }//nkh
+    if (mockg_Image2.IsValid()){
         (debug > 1) ? cout << "graba image" << endl : cout << "";
-        rc= pRecorder->AddNodeToRecording(mockg_Image, XN_CODEC_JPEG);
+        //nkh
+        rc= pRecorder->AddNodeToRecording(mockg_Image2, XN_CODEC_JPEG);
         if (rc != XN_STATUS_OK){
             printf("ERROR add image node %s\n", xnGetStatusString(rc));
             return(-1);
@@ -633,6 +655,7 @@ int MyKinect::saveMockONIFile(String outputName){
     }
 
     (debug > 1) ? cout << "MyKinect::saveMockONIFile" << endl : cout << "";
+
 }
 
 
@@ -642,24 +665,26 @@ int MyKinect::saveMockONIFile(String outputName){
 */
 int MyKinect::record(){
     XnStatus rc= XN_STATUS_OK;
-    rc= pRecorder->Record();
-//cout << "empieza a grabar..." << endl;
+    cout<<" 647 "<<endl;
+    pRecorder->Record();
+    //    rc= pRecorder->Record();
+    cout << "empieza a grabar..." << endl;
     if (rc != XN_STATUS_OK){
         printf("ERROR pRecorder->Record() %s\n", xnGetStatusString(rc));
         return(-1);
     }
 
-//cout << "frame grabado: " << g_Image.GetFrameID() << endl;
+    cout << "frame grabado: " << g_Image.GetFrameID() << endl;
 
-//	  rc = g_Context.WaitAnyUpdateAll();
-//    rc = g_Context.WaitAndUpdateAll();
-//	  rc = g_Context.WaitNoneUpdateAll();
-//    rc = g_Context.WaitOneUpdateAll(g_Image);
-//    if (rc != XN_STATUS_OK){
-//        printf("ERROR pRecorder->Record() %s\n", xnGetStatusString(rc));
-//        return(-1);
-//    }
-//cout << "MyKinect::record" << endl;
+    //	  rc = g_Context.WaitAnyUpdateAll();
+    //    rc = g_Context.WaitAndUpdateAll();
+    //	  rc = g_Context.WaitNoneUpdateAll();
+    //    rc = g_Context.WaitOneUpdateAll(g_Image);
+    //    if (rc != XN_STATUS_OK){
+    //        printf("ERROR pRecorder->Record() %s\n", xnGetStatusString(rc));
+    //        return(-1);
+    //    }
+    cout << "MyKinect::record" << endl;
 }
 
 
@@ -669,11 +694,11 @@ int MyKinect::record(){
 int MyKinect::stopRecord(){
 
 
-cout << "frame grabado: " << g_Image.GetFrameID() << endl;
+    cout << "frame grabado: " << g_Image.GetFrameID() << endl;
 
     pRecorder->Release();
     delete pRecorder;
-//cout << "MyKinect::stopRecord" << endl;
+    //cout << "MyKinect::stopRecord" << endl;
 }
 
 
@@ -765,9 +790,9 @@ int MyKinect::getfreenect_angle(){
 /**
 * get led
 */
-freenect_led_options MyKinect::getled(){
-    return led;
-}
+//freenect_led_options MyKinect::getled(){
+//    return led;
+//}
 /**
 * get fileXML
 */

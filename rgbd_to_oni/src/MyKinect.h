@@ -18,9 +18,9 @@
 
 
 //includes para KINECT (freenect)
-#include "libfreenect.h"
+//#include "libfreenect.h"
 //#include "libKinect/libfreenect_cv.h"
-#include "libfreenect_sync.h"
+//#include "libfreenect_sync.h"
 
 //
 //#include <iostream>
@@ -74,7 +74,7 @@ class MyKinect
         /**
         * Modifica el valor del LED de la kinect (utiliza freenect ya que a día de hoy no se puede con OpenNI)
         */
-        int setLed(freenect_led_options arg_led);
+        //int setLed(freenect_led_options arg_led);
 
         /**
         * Inicializa y realiza la grabación de la kinect en un fichero ONI
@@ -152,7 +152,7 @@ class MyKinect
         /**
         * get led
         */
-        freenect_led_options getled();
+        //freenect_led_options getled();
         /**
         * get fileXML
         */
@@ -176,7 +176,7 @@ class MyKinect
         ImageMetaData g_ImageMD;
         IRMetaData g_irMD;
 
-//        Generator* pGenerator;
+//        pRecorderGenerator* pGenerator;
         Recorder* pRecorder;
 
         UserGenerator g_User;
@@ -184,13 +184,13 @@ class MyKinect
         SceneMetaData analySceneMD;
 
         int freenect_angle;
-        freenect_led_options led;
+//        freenect_led_options led;
         String fileXML;
 
         //para poder modificar las imágenes y profundidad y poder guardarlo como .oni
         MockDepthGenerator mockg_Depth;
         MockImageGenerator mockg_Image;
-
+        MockImageGenerator mockg_Image2;
 
     private:
 };

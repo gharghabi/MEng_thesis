@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>rgbd_to_oni</name>
+  <name>mythesis_body</name>
   <version>0.0.0</version>
-  <description>The rgbd_to_oni package</description>
+  <description>The mythesis_body package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
@@ -46,42 +46,17 @@
   
   <build_depend>pcl_conversions</build_depend>
   <build_depend>pcl_ros</build_depend>
-    <build_depend>openni_camera</build_depend>
-  <build_depend>openni_tracker</build_depend>
-
+  
   
   <build_depend>sensor_msgs</build_depend>
   <build_depend>cv_bridge</build_depend>
   <build_depend>image_transport</build_depend>
     <build_depend>upperbodycore_msgs</build_depend>
 
-
-  <build_depend>libopenni-dev</build_depend>
-  <build_depend>libusb-1.0-dev</build_depend>
-  <build_depend>libopenni-nite-dev</build_depend>
-  <build_depend>libopenni-sensor-primesense-dev</build_depend>
-  <build_depend>geometry_msgs</build_depend>
-  <build_depend>orocos_kdl</build_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>roslib</build_depend>
-  <build_depend>tf</build_depend>
-
-  <run_depend>libopenni-dev</run_depend>
-  <run_depend>libusb-1.0-dev</run_depend>
-  <run_depend>libopenni-nite-dev</run_depend>
-  <run_depend>libopenni-sensor-primesense-dev</run_depend>
-  <run_depend>geometry_msgs</run_depend>
-  <run_depend>orocos_kdl</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>roslib</run_depend>
-  <run_depend>tf</run_depend>
-
+  
   <build_depend>actionlib</build_depend>
   <build_depend>actionlib_msgs</build_depend>
   <run_depend>actionlib</run_depend>
- <run_depend>openni_camera</run_depend>
-  <run_depend>openni_tracker</run_depend>
-
   <run_depend>actionlib_msgs</run_depend>
    <run_depend>image_transport</run_depend>
   <run_depend>cv_bridge</run_depend>

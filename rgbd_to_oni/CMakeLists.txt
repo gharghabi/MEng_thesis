@@ -39,11 +39,14 @@ add_definitions(${PCL_DEFINITIONS})
 include_directories(include  ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
+                    ${OpenNI_INCLUDE_DIRS}
 )
 include_directories(include)
   
 catkin_package(
-  INCLUDE_DIRS include
+    DEPENDS 
+    CATKIN_DEPENDS 
+	openni_tracker
 )
   
 
@@ -62,12 +65,17 @@ INCLUDE(FindCUDA)
  add_library(myKinect_lib
  src/MyKinect.cpp
  ) 
- target_link_libraries(myKinect_lib ${OpenCV_LIBS} ${catkin_LIBRARIES} ~/catkin_ws/src/thesis/rgbd_to_oni/include/libfreenect.so)
+ target_link_libraries(myKinect_lib ${OpenCV_LIBS} ${catkin_LIBRARIES} ~/catkin_ws/src/thesis/rgbd_to_oni/include/libfreenect.so  
+~/catkin_ws/src/thesis/rgbd_to_oni/include/libfreenect_cv.so
+~/catkin_ws/src/thesis/rgbd_to_oni/include/libfreenect_sync.so)
 
  add_library(myImage_lib
  src/MyImage.cpp
  )
- target_link_libraries(myImage_lib ${OpenCV_LIBS} ${catkin_LIBRARIES} ~/catkin_ws/src/thesis/rgbd_to_oni/include/libfreenect.so)
+ target_link_libraries(myImage_lib ${OpenCV_LIBS} ${catkin_LIBRARIES} ~/catkin_ws/src/thesis/rgbd_to_oni/include/libfreenect.so
+~/catkin_ws/src/thesis/rgbd_to_oni/include/libfreenect_cv.so
+~/catkin_ws/src/thesis/rgbd_to_oni/include/libfreenect_sync.so
+)
 
 
 
@@ -75,4 +83,21 @@ INCLUDE(FindCUDA)
 add_executable(main src/main.cpp)
 target_link_libraries(main  ${catkin_LIBRARIES} myKinect_lib myImage_lib  )
 add_dependencies(main  upperbodycore_msgs_generate_messages_cpp)
+
+add_executable(convert_rgbd_to_oni src/convert_rgbd_to_oni.cpp)
+target_link_libraries(convert_rgbd_to_oni  ${catkin_LIBRARIES})
+add_dependencies(convert_rgbd_to_oni  upperbodycore_msgs_generate_messages_cpp)
+
+add_executable(recordONIFile src/recordONIFile.cpp)
+target_link_libraries(recordONIFile  ${catkin_LIBRARIES})
+add_dependencies(recordONIFile  upperbodycore_msgs_generate_messages_cpp)
+
+add_executable(convert_oni_to_pcd src/convert_oni_to_pcd.cpp)
+target_link_libraries(convert_oni_to_pcd  ${catkin_LIBRARIES})
+add_dependencies(convert_oni_to_pcd  upperbodycore_msgs_generate_messages_cpp)
+
+add_executable(show_pcd_files src/show_pcd_files.cpp)
+target_link_libraries(show_pcd_files  ${catkin_LIBRARIES})
+add_dependencies(show_pcd_files  upperbodycore_msgs_generate_messages_cpp)
+
 

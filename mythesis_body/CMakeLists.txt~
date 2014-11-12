@@ -18,7 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   actionlib
   actionlib_msgs 
-  upperbodycore_msgs
+upperbodycore_msgs
 )
 
 ## Find catkin and any catkin packages
@@ -130,7 +130,7 @@ include_directories(include  ${catkin_INCLUDE_DIRS}
 
   
   
- add_library(body_features_inFaceCode_lib
+ add_library(body_features_lib
  src/skeleton/calc_features.cpp
  )
  

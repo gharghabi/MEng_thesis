@@ -130,12 +130,6 @@ include_directories(include  ${catkin_INCLUDE_DIRS}
 
   
   
- add_library(body_features_lib
- src/skeleton/calc_features.cpp
- )
- 
- target_link_libraries(body_features_lib ${OpenCV_LIBS} ${catkin_LIBRARIES})
-
 include_directories(/usr/include/vtk-5.8)
 include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
@@ -148,76 +142,26 @@ FIND_PACKAGE(CUDA)
 INCLUDE(FindCUDA)
 
 
-## Declare a cpp library
-# add_library(beginner_turorials
-#   src/${PROJECT_NAME}/beginner_turorials.cpp
-# )
-
-## Declare a cpp executable
-# add_executable(beginner_turorials_node src/beginner_turorials_node.cpp)
-
-## Add cmake target dependencies of the executable/library
-## as an example, message headers may need to be generated before nodes
-# add_dependencies(beginner_turorials_node athomerobot_msgs_generate_messages_cpp)
-
-## Specify libraries to link a library or executable target against
-# target_link_libraries(beginner_turorials_node
-#   ${catkin_LIBRARIES}
-# )
-
-#############
-## Install ##
-#############
-
-# all install targets should use catkin DESTINATION variables
-# See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
-
-## Mark executable scripts (Python etc.) for installation
-## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
-
-## Mark executables and/or libraries for installation
-# install(TARGETS beginner_turorials beginner_turorials_node
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
-
-## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE
-# )
-
-## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
-#   # myfile1
-#   # myfile2
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
-
-#############
-## Testing ##
-#############
-
-## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_beginner_turorials.cpp)
-# if(TARGET ${PROJECT_NAME}-test)
-#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
-# endif()
-
-## Add folders to be run by python nosetests
-# catkin_add_nosetests(test)
 
 
+
+
+#add_executable(main_ground_based_people_detection src/main_ground_based_people_detection.cpp)
+#target_link_libraries(main_ground_based_people_detection  ${PCL_LIBRARIES} ${PCL_COMMON_LIBRARIES} ${PCL_IO_LIBRARIES} #${PCL_VISUALISATION_LIBRARIES} ${publish_primitives} ${libvtkCommon.so} ${libvtkFiltering.so} ${catkin_LIBRARIES})
+
+#add_dependencies(main_ground_based_people_detection  upperbodycore_msgs_generate_messages_cpp)
+
+
+
+#add_executable(speech src/speech.cpp)
+#target_link_libraries(speech ${catkin_LIBRARIES})
+#add_dependencies(speech athomerobot_msgs_generate_messages_cpp)
+
+# %EndTag(FULLTEXT)%
 
 add_executable(save_data src/save_data.cpp)
-target_link_libraries(save_data  ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(save_data  ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${VTK_LIBRARIES}  ${PCL_LIBRARIES} ${PCL_COMMON_LIBRARIES} ${PCL_IO_LIBRARIES} ${PCL_VISUALISATION_LIBRARIES} ${publish_primitives} ${libvtkCommon.so} ${libvtkFiltering.so} /usr/lib/libvtkFiltering.so)
 
-add_dependencies(PLY_TO_PCD  upperbodycore_msgs_generate_messages_cpp)
+add_dependencies(save_data  upperbodycore_msgs_generate_messages_cpp)
 
 
